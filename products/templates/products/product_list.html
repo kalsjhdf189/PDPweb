@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Продукция</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <img src="{% static 'images/logo.svg' %}" alt="БЕТОННЫЙ ЗАВОД Bentonit">
+        </div>
+        <nav>
+            <a href="{% url 'product_list' %}" class="active">Продукция</a>
+            <a href="{% url 'about' %}">О компании</a>
+            <a href="{% url 'contacts' %}">Контакты</a>
+        </nav>
+        <div class="icons">
+            <a href="{% url 'cart' %}">
+                <img src="{% static 'images/cart.png' %}" alt="Корзина">
+            </a>
+            <img src="{% static 'images/user.png' %}" alt="Профиль">
+        </div>
+    </div>
+    <div class="header-border"></div>
+
+    <div class="container">
+        <h1>Продукция</h1>
+        <div class="product-grid">
+            {% for group in product_groups %}
+            <div class="product-card group">
+                <img src="{% if group.Изображение %}{{ group.Изображение }}{% else %}https://via.placeholder.com/150?text=Product+Image{% endif %}" alt="Изображение группы">
+                <h3>{{ group.Наименование }}</h3>
+                <ul>
+                    {% for product_type in group.product_types %}
+                    <li><a href="{% url 'product_type_list' product_type.id %}">{{ product_type.Наименование }}</a></li>
+                    {% empty %}
+                    <li>Нет типов продукции</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

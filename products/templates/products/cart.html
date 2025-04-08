@@ -1,0 +1,107 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Корзина</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <img src="{% static 'images/logo.svg' %}" alt="БЕТОННЫЙ ЗАВОД Bentonit">
+        </div>
+        <nav>
+            <a href="{% url 'product_list' %}">Продукция</a>
+            <a href="{% url 'about' %}">О компании</a>
+            <a href="{% url 'contacts' %}">Контакты</a>
+        </nav>
+        <div class="icons">
+            <a href="{% url 'cart' %}">
+                <img src="{% static 'images/cart.png' %}" alt="Корзина">
+            </a>
+            <img src="{% static 'images/user.png' %}" alt="Профиль">
+        </div>
+    </div>
+    <div class="header-border"></div>
+
+    <div class="container">
+        <h1>Корзина</h1>
+        <div class="cart-items">
+            <!-- Список товаров будет добавлен через JavaScript -->
+        </div>
+        <a href="{% url 'checkout' %}">
+            <button class="checkout-button">Оформить заказ</button>
+        </a>
+    </div>
+
+    <script>
+        // Функция для отображения товаров в корзине
+        function displayCartItems() {
+            const cartItemsContainer = document.querySelector('.cart-items');
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+            // Очищаем контейнер перед добавлением элементов
+            cartItemsContainer.innerHTML = '';
+
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = '<p>Корзина пуста.</p>';
+                return;
+            }
+
+            cart.forEach(item => {
+                const cartItem = document.createElement('div');
+                cartItem.classList.add('cart-item');
+
+                cartItem.innerHTML = `
+                    <!-- Фотография -->
+                    <img src="${item.image}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/50?text=Product+Image';">
+                    <!-- Название -->
+                    <span class="cart-item-name">${item.name}</span>
+                    <!-- Счётчик -->
+                    <div class="quantity">
+                        <button class="decrease">-</button>
+                        <span>${item.quantity}</span>
+                        <button class="increase">+</button>
+                    </div>
+                    <!-- Цена -->
+                    <span class="cart-item-price">${item.price * item.quantity} ₽</span>
+                    <!-- Кнопка удаления -->
+                    <button class="remove-item">×</button>
+                `;
+
+                // Обработчик для кнопки уменьшения количества
+                cartItem.querySelector('.decrease').addEventListener('click', () => {
+                    if (item.quantity > 1) {
+                        item.quantity -= 1;
+                    } else {
+                        cart.splice(cart.indexOf(item), 1); // Удаляем товар, если количество становится 0
+                    }
+                    localStorage.setItem('cart', JSON.stringify(cart));
+                    displayCartItems(); // Обновляем отображение
+                });
+
+                // Обработчик для кнопки увеличения количества
+                cartItem.querySelector('.increase').addEventListener('click', () => {
+                    item.quantity += 1;
+                    localStorage.setItem('cart', JSON.stringify(cart));
+                    displayCartItems(); // Обновляем отображение
+                });
+
+                // Обработчик для кнопки удаления
+                cartItem.querySelector('.remove-item').addEventListener('click', () => {
+                    cart.splice(cart.indexOf(item), 1);
+                    localStorage.setItem('cart', JSON.stringify(cart));
+                    displayCartItems(); // Обновляем отображение
+                });
+
+                cartItemsContainer.appendChild(cartItem);
+            });
+        }
+
+        // Отображаем товары при загрузке страницы
+        displayCartItems();
+    </script>
+</body>
+</html>

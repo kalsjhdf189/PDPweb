@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Контакты</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <img src="{% static 'images/logo.svg' %}" alt="БЕТОННЫЙ ЗАВОД Bentonit">
+        </div>
+        <nav>
+            <a href="{% url 'product_list' %}">Продукция</a>
+            <a href="{% url 'about' %}">О компании</a>
+            <a href="#" class="active">Контакты</a>
+        </nav>
+        <div class="icons">
+            <a href="{% url 'cart' %}">
+                <img src="{% static 'images/cart.png' %}" alt="Корзина">
+            </a>
+            <img src="{% static 'images/user.png' %}" alt="Профиль">
+        </div>
+    </div>
+    <div class="header-border"></div>
+
+    <div class="container">
+        <h1>Контакты</h1>
+        <div class="contacts-content">
+            <h2>ООО «Бентонит Хакасии»</h2>
+            <p>Адрес: 655162 Республика Хакасия, город Черногорск, ул.М. Горького, 11А</p>
+            <p>Мы открыты с 08:00 до 17:00</p>
+            <p>info@b-kh.ru</p>
+            <p>тел.: +7 (390-31) 641-11</p>
+            <h2>Реквизиты</h2>
+            <p>ООО «Бентонит Хакасии»</p>
+            <p>ОГРН 1141930300843</p>
+            <p>ИНН 1903023547 КПП 190301001</p>
+            <p>Р/С 4070281067120101107</p>
+            <p>ПАО Сбербанк г. Абакан</p>
+            <p>К/С 301018105000000608</p>
+            <p>БИК 049514608</p>
+        </div>
+    </div>
+</body>
+</html>
