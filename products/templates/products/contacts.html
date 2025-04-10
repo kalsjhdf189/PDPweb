@@ -21,7 +21,9 @@
             <a href="{% url 'cart' %}">
                 <img src="{% static 'images/cart.png' %}" alt="Корзина">
             </a>
-            <img src="{% static 'images/user.png' %}" alt="Профиль">
+            <a href="{% url 'auth' %}">
+                <img src="{% static 'images/us.svg' %}" alt="Профиль">
+            </a>
         </div>
     </div>
     <div class="header-border"></div>
@@ -30,7 +32,7 @@
         <h1>Контакты</h1>
         <div class="contacts-content">
             <h2>ООО «Бентонит Хакасии»</h2>
-            <p>Адрес: 655162 Республика Хакасия, город Черногорск, ул.М. Горького, 11А</p>
+            <p>Адрес: 655162 Республика Хакасия, город Черногорск, ул. М. Горького, 11А</p>
             <p>Мы открыты с 08:00 до 17:00</p>
             <p>info@b-kh.ru</p>
             <p>тел.: +7 (390-31) 641-11</p>

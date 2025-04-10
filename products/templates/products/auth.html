@@ -1,0 +1,178 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Авторизация</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <img src="{% static 'images/logo.svg' %}" alt="БЕТОННЫЙ ЗАВОД Bentonit">
+        </div>
+        <nav>
+            <a href="{% url 'product_list' %}">Продукция</a>
+            <a href="{% url 'about' %}">О компании</a>
+            <a href="{% url 'contacts' %}">Контакты</a>
+        </nav>
+        <div class="icons">
+            <a href="{% url 'cart' %}">
+                <img src="{% static 'images/cart.png' %}" alt="Корзина">
+            </a>
+            <a href="{% url 'auth' %}">
+                <img src="{% static 'images/us.svg' %}" alt="Профиль">
+            </a>
+        </div>
+    </div>
+    <div class="header-border"></div>
+
+    <div class="container">
+        <h1>Авторизация</h1>
+
+        <!-- Вывод сообщений об успехе или ошибке -->
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message {% if message.tags == 'success' %}success{% else %}error{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Форма авторизации или регистрации -->
+        <div class="auth-form" id="auth-form">
+            {% if show_register_form %}
+                <!-- Форма регистрации -->
+                <form action="{% url 'register' %}" method="POST">
+                    {% csrf_token %}
+                    <h2>Регистрация</h2>
+                    <label for="наименование">Наименование организации</label>
+                    <input type="text" id="наименование" name="наименование" placeholder="Введите наименование" required>
+
+                    <label for="инн">ИНН</label>
+                    <input type="text" id="инн" name="инн" placeholder="Введите ИНН" required>
+
+                    <label for="фио_директора">ФИО директора</label>
+                    <input type="text" id="фио_директора" name="фио_директора" placeholder="Введите ФИО директора" required>
+
+                    <label for="телефон">Телефон</label>
+                    <input type="text" id="телефон" name="телефон" placeholder="Введите телефон" required>
+
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Введите email" required>
+
+                    <label for="пароль">Пароль</label>
+                    <input type="password" id="пароль" name="пароль" placeholder="Введите пароль" required>
+
+                    <label for="места_продаж">Места продаж</label>
+                    <input type="text" id="места_продаж" name="места_продаж" placeholder="Введите места продаж" required>
+
+                    <label for="тип_партнера">Тип партнёра</label>
+                    <select id="тип_партнера" name="тип_партнера" required>
+                        {% for partner_type in partner_types %}
+                            <option value="{{ partner_type.id }}">{{ partner_type.Наименование }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <label for="address-input">Введите адрес</label>
+                    <input type="text" id="address-input" name="address" placeholder="Начните вводить адрес" required>
+                    <div id="address-suggestions" class="suggestions" style="display: none;"></div>
+
+                    <!-- Скрытые поля для данных адреса -->
+                    <input type="hidden" id="индекс" name="индекс">
+                    <input type="hidden" id="регион" name="регион">
+                    <input type="hidden" id="город" name="город">
+                    <input type="hidden" id="улица" name="улица">
+                    <input type="hidden" id="дом" name="дом">
+
+                    <div class="auth-buttons">
+                        <button type="submit" class="register-button">Зарегистрироваться</button>
+                        <button type="button" class="login-button" onclick="window.location.href='{% url 'auth' %}'">Назад к авторизации</button>
+                    </div>
+                </form>
+            {% else %}
+                <!-- Форма авторизации -->
+                <form action="{% url 'auth' %}" method="POST">
+                    {% csrf_token %}
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Введите email" required>
+                    <label for="password">Пароль</label>
+                    <input type="password" id="password" name="password" placeholder="Введите пароль" required>
+                    <div class="auth-buttons">
+                        <button type="submit" class="login-button">Войти</button>
+                        <button type="button" class="register-button" onclick="window.location.href='{% url 'register' %}'">Зарегистрироваться</button>
+                    </div>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Интеграция с API DaData для автодополнения адреса
+        const addressInput = document.getElementById('address-input');
+        const suggestionsContainer = document.getElementById('address-suggestions');
+
+        addressInput.addEventListener('input', async () => {
+            const query = addressInput.value.trim();
+            if (query.length < 3) {
+                suggestionsContainer.style.display = 'none';
+                suggestionsContainer.innerHTML = '';
+                return;
+            }
+
+            try {
+                const response = await fetch('https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': 'Token 045de845fe99870f9368b07ff0592323d0cd1edb' // Замените YOUR_DADATA_API_KEY на ваш API-ключ
+                    },
+                    body: JSON.stringify({ query: query })
+                });
+
+                const data = await response.json();
+                suggestionsContainer.innerHTML = '';
+
+                if (data.suggestions && data.suggestions.length > 0) {
+                    suggestionsContainer.style.display = 'block';
+                    data.suggestions.forEach(suggestion => {
+                        const suggestionItem = document.createElement('div');
+                        suggestionItem.classList.add('suggestion-item');
+                        suggestionItem.textContent = suggestion.value;
+                        suggestionItem.addEventListener('click', () => {
+                            addressInput.value = suggestion.value;
+                            // Заполняем скрытые поля данными из DaData
+                            document.getElementById('индекс').value = suggestion.data.postal_code || '';
+                            document.getElementById('регион').value = suggestion.data.region || '';
+                            document.getElementById('город').value = suggestion.data.city || suggestion.data.settlement || '';
+                            document.getElementById('улица').value = suggestion.data.street || '';
+                            document.getElementById('дом').value = suggestion.data.house || '';
+                            suggestionsContainer.style.display = 'none';
+                            suggestionsContainer.innerHTML = '';
+                        });
+                        suggestionsContainer.appendChild(suggestionItem);
+                    });
+                } else {
+                    suggestionsContainer.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Ошибка при запросе к DaData:', error);
+                suggestionsContainer.innerHTML = '<div class="suggestion-item">Ошибка при загрузке адресов</div>';
+                suggestionsContainer.style.display = 'block';
+            }
+        });
+
+        // Скрываем предложения при клике вне поля
+        document.addEventListener('click', (e) => {
+            if (!addressInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+                suggestionsContainer.style.display = 'none';
+                suggestionsContainer.innerHTML = '';
+            }
+        });
+    </script>
+</body>
+</html>

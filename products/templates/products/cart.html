@@ -21,7 +21,9 @@
             <a href="{% url 'cart' %}">
                 <img src="{% static 'images/cart.png' %}" alt="Корзина">
             </a>
-            <img src="{% static 'images/user.png' %}" alt="Профиль">
+            <a href="{% url 'auth' %}">
+                <img src="{% static 'images/us.svg' %}" alt="Профиль">
+            </a>
         </div>
     </div>
     <div class="header-border"></div>
@@ -31,8 +33,8 @@
         <div class="cart-items">
             <!-- Список товаров будет добавлен через JavaScript -->
         </div>
-        <a href="{% url 'checkout' %}">
-            <button class="checkout-button">Оформить заказ</button>
+        <a href="{% url 'checkout' %}" id="checkout-link">
+            <button class="checkout-button" id="checkout-button">Оформить заказ</button>
         </a>
     </div>
 
@@ -40,15 +42,24 @@
         // Функция для отображения товаров в корзине
         function displayCartItems() {
             const cartItemsContainer = document.querySelector('.cart-items');
+            const checkoutButton = document.getElementById('checkout-button');
+            const checkoutLink = document.getElementById('checkout-link');
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
 
             // Очищаем контейнер перед добавлением элементов
             cartItemsContainer.innerHTML = '';
 
+            // Проверяем, пуста ли корзина
             if (cart.length === 0) {
                 cartItemsContainer.innerHTML = '<p>Корзина пуста.</p>';
+                checkoutButton.disabled = true; // Делаем кнопку неактивной
+                checkoutLink.style.pointerEvents = 'none'; // Отключаем кликабельность ссылки
                 return;
             }
+
+            // Если корзина не пуста, активируем кнопку
+            checkoutButton.disabled = false;
+            checkoutLink.style.pointerEvents = 'auto';
 
             cart.forEach(item => {
                 const cartItem = document.createElement('div');

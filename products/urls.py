@@ -9,4 +9,6 @@ urlpatterns = [
     path('contacts/', views.contacts, name='contacts'),
     path('cart/', views.cart, name='cart'),
     path('checkout/', views.checkout, name='checkout'),
+    path('auth/', views.auth, name='auth'),
+    path('register/', views.register, name='register'),  # Новый URL для регистрации
 ]

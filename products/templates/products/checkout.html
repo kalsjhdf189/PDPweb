@@ -21,7 +21,9 @@
             <a href="{% url 'cart' %}">
                 <img src="{% static 'images/cart.png' %}" alt="Корзина">
             </a>
-            <img src="{% static 'images/user.png' %}" alt="Профиль">
+            <a href="{% url 'auth' %}">
+                <img src="{% static 'images/us.svg' %}" alt="Профиль">
+            </a>
         </div>
     </div>
     <div class="header-border"></div>

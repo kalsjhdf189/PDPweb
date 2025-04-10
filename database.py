@@ -19,11 +19,11 @@ class LegalAddress(Base):
     __tablename__ = 'юридический_адрес'
 
     id = Column(Integer, primary_key=True)
-    индекс = Column(Integer)
-    регион = Column(String)
-    город = Column(String)
-    улица = Column(String)
-    дом = Column(Integer)
+    Индекс = Column(Integer)
+    Регион = Column(String)
+    Город = Column(String)
+    Улица = Column(String)
+    Дом = Column(Integer)
 
     склады = relationship("Warehouse", back_populates="юридический_адрес")
     партнеры = relationship("Partner", back_populates="юридический_адрес")
@@ -227,6 +227,7 @@ class Partner(Base):
     Телефон = Column(String)  # Изменено на String
     email = Column(String)
     Места_продаж = Column(String)
+    Пароль = Column(String)
     
     юридический_адрес = relationship("LegalAddress", back_populates="партнеры")
     тип = relationship("PartnerType", back_populates="партнеры")
