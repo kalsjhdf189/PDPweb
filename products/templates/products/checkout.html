@@ -5,49 +5,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Оформление заказа</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/global.css' %}">
+    <link rel="stylesheet" href="{% static 'css/layout.css' %}">
 </head>
 <body>
-    <div class="header">
-        <div class="logo">
-            <img src="{% static 'images/logo.svg' %}" alt="БЕТОННЫЙ ЗАВОД Bentonit">
-        </div>
-        <nav>
-            <a href="{% url 'product_list' %}">Продукция</a>
-            <a href="{% url 'about' %}">О компании</a>
-            <a href="{% url 'contacts' %}">Контакты</a>
-        </nav>
-        <div class="icons">
-            <a href="{% url 'cart' %}">
-                <img src="{% static 'images/cart.png' %}" alt="Корзина">
-            </a>
-            <a href="{% url 'auth' %}">
-                <img src="{% static 'images/us.svg' %}" alt="Профиль">
-            </a>
-        </div>
-    </div>
-    <div class="header-border"></div>
+    {% include 'products/header.html' %}
 
     <div class="container">
         <h1>Оформление заказа</h1>
-        <div class="checkout-content">
-            <!-- Форма для персональных данных -->
-            <div class="personal-info">
-                <h2>Персональные данные</h2>
-                <label>ФИО директора</label>
-                <input type="text" placeholder="ФИО директора">
-                <label>Название организации</label>
-                <input type="text" placeholder="Название организации">
-                <label>ИНН</label>
-                <input type="text" placeholder="ИНН">
-                <label>Номер телефона</label>
-                <input type="text" placeholder="Номер телефона">
-                <label>Email</label>
-                <input type="email" placeholder="Email">
-                <label>Адрес</label>
-                <input type="text" id="address-input" placeholder="Введите город или адрес">
-                <div id="address-suggestions" class="suggestions"></div>
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">{{ message }}</div>
+                {% endfor %}
             </div>
+        {% endif %}
+        <div class="checkout-content">
+            <!-- Форма для способа оплаты и комментария -->
+            <div class="auth-form">
+                <h2>Детали оплаты</h2>
+                <form id="payment-form" action="{% url 'checkout' %}" method="POST">
+                    {% csrf_token %}
+                    <!-- Скрытое поле для корзины -->
+                    <input type="hidden" name="cart" id="cart-data">
+
+                    <!-- Способ оплаты -->
+                    <label for="payment_method">Способ оплаты</label>
+                    <select id="payment_method" name="payment_method">
+                        <option value="" disabled selected>Выберите способ оплаты</option>
+                        <option value="Наличные">Наличные</option>
+                        <option value="Безналичные">Безналичные</option>
+                    </select>
+
+                    <!-- Комментарий к заказу -->
+                    <label for="comment">Комментарий к заказу</label>
+                    <textarea id="comment" name="comment" placeholder="Введите ваш комментарий (необязательно)"></textarea>
+
+                    <!-- Кнопка отправки (будет в блоке .order-details) -->
+                </form>
+            </div>
+
             <!-- Детали заказа -->
             <div class="order-details">
                 <h2>Детали заказа</h2>
@@ -58,7 +55,7 @@
                     <span>Всего:</span>
                     <span class="total-price">0 ₽</span>
                 </div>
-                <button class="pay-button">Оплатить заказ</button>
+                <button type="submit" form="payment-form" class="pay-button">Оплатить заказ</button>
             </div>
         </div>
     </div>
@@ -76,6 +73,7 @@
             if (cart.length === 0) {
                 orderItemsContainer.innerHTML = '<p>Корзина пуста.</p>';
                 totalPriceElement.textContent = '0 ₽';
+                document.querySelector('.pay-button').disabled = true; // Отключаем кнопку, если корзина пуста
                 return;
             }
 
@@ -92,90 +90,24 @@
             });
 
             totalPriceElement.textContent = `${total} ₽`;
+            document.querySelector('.pay-button').disabled = false; // Активируем кнопку, если корзина не пуста
         }
-
-        // Интеграция с API DaData для автодополнения адреса
-        const addressInput = document.getElementById('address-input');
-        const suggestionsContainer = document.getElementById('address-suggestions');
-
-        addressInput.addEventListener('input', async () => {
-            const query = addressInput.value.trim();
-            if (query.length < 3) {
-                suggestionsContainer.innerHTML = '';
-                return;
-            }
-
-            try {
-                const response = await fetch('https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'Authorization': 'Token 045de845fe99870f9368b07ff0592323d0cd1edb' // Замените YOUR_DADATA_API_KEY на ваш API-ключ
-                    },
-                    body: JSON.stringify({ query: query })
-                });
-
-                const data = await response.json();
-                suggestionsContainer.innerHTML = '';
-
-                if (data.suggestions && data.suggestions.length > 0) {
-                    data.suggestions.forEach(suggestion => {
-                        const suggestionItem = document.createElement('div');
-                        suggestionItem.classList.add('suggestion-item');
-                        suggestionItem.textContent = suggestion.value;
-                        suggestionItem.addEventListener('click', () => {
-                            addressInput.value = suggestion.value;
-                            suggestionsContainer.innerHTML = '';
-                        });
-                        suggestionsContainer.appendChild(suggestionItem);
-                    });
-                }
-            } catch (error) {
-                console.error('Ошибка при запросе к DaData:', error);
-                suggestionsContainer.innerHTML = '<div class="suggestion-item">Ошибка при загрузке адресов</div>';
-            }
-        });
-
-        // Скрываем предложения при клике вне поля
-        document.addEventListener('click', (e) => {
-            if (!addressInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
-                suggestionsContainer.innerHTML = '';
-            }
-        });
-
-        // Обработчик для кнопки "Оплатить заказ"
-        document.querySelector('.pay-button').addEventListener('click', () => {
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            if (cart.length === 0) {
-                alert('Корзина пуста!');
-                return;
-            }
-
-            // Проверяем, заполнены ли обязательные поля
-            const inputs = document.querySelectorAll('.personal-info input');
-            let allFilled = true;
-            inputs.forEach(input => {
-                if (!input.value.trim()) {
-                    allFilled = false;
-                    input.style.border = '1px solid red';
-                } else {
-                    input.style.border = '';
-                }
-            });
-
-            if (!allFilled) {
-                alert('Пожалуйста, заполните все обязательные поля!');
-                return;
-            }
-
-            alert('Заказ успешно оплачен! Спасибо за покупку.');
-            localStorage.removeItem('cart'); // Очищаем корзину
-            window.location.href = '{% url "cart" %}'; // Перенаправляем на страницу корзины
-        });
 
         // Отображаем товары при загрузке страницы
         displayOrderItems();
+
+        // Обработчик для кнопки "Оплатить заказ"
+        document.querySelector('.pay-button').addEventListener('click', (event) => {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            if (cart.length === 0) {
+                event.preventDefault();
+                return;
+            }
+
+            // Добавляем данные корзины в скрытое поле
+            const cartInput = document.querySelector('#cart-data');
+            cartInput.value = JSON.stringify(cart);
+        });
     </script>
 </body>
 </html>

@@ -5,28 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ product.Наименование }}</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/global.css' %}">
+    <link rel="stylesheet" href="{% static 'css/layout.css' %}">
 </head>
 <body>
-    <div class="header">
-        <div class="logo">
-            <img src="{% static 'images/logo.svg' %}" alt="БЕТОННЫЙ ЗАВОД Bentonit">
-        </div>
-        <nav>
-            <a href="{% url 'product_list' %}">Продукция</a>
-            <a href="{% url 'about' %}">О компании</a>
-            <a href="{% url 'contacts' %}">Контакты</a>
-        </nav>
-        <div class="icons">
-            <a href="{% url 'cart' %}">
-                <img src="{% static 'images/cart.png' %}" alt="Корзина">
-            </a>
-            <a href="{% url 'auth' %}">
-                <img src="{% static 'images/us.svg' %}" alt="Профиль">
-            </a>
-        </div>
-    </div>
-    <div class="header-border"></div>
+    {% include 'products/header.html' %}
 
     <div class="container">
         <a href="{% url 'product_type_list' product.id_тип %}" class="back-link">←</a>
@@ -71,7 +54,7 @@
             }
 
             localStorage.setItem('cart', JSON.stringify(cart));
-            // Уведомление "добавлен в корзину!" удалено
+
         });
     </script>
 </body>

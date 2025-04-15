@@ -1,0 +1,326 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет</title>
+    <link rel="stylesheet" href="{% static 'css/global.css' %}">
+    <link rel="stylesheet" href="{% static 'css/layout.css' %}">
+    <link rel="stylesheet" href="{% static 'css/personal_account.css' %}">
+</head>
+<body>
+    {% include 'products/header.html' %}
+
+    <div class="container">
+        <!-- Левое меню -->
+        <div class="sidebar">
+            <h3>Мой кабинет</h3>
+            <ul>
+                <li class="sidebar-item" onclick="showSection('current-orders')">Текущие заказы</li>
+                <li class="sidebar-item" onclick="showSection('order-history')">История заказов</li>
+                <li class="sidebar-item" onclick="showSection('personal-data')">Личные данные</li>
+                <li class="sidebar-item logout-item">
+                    <form action="{% url 'logout' %}" method="POST" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" class="logout-button">Выйти из аккаунта</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Основной контент -->
+        <div class="main-content">
+            <h1>Личный кабинет</h1>
+
+            <!-- Вывод сообщений об успехе или ошибке -->
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="message {% if message.tags == 'success' %}success{% else %}error{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Блоки личного кабинета -->
+            <div class="personal-account-blocks">
+                <div class="block" onclick="showSection('current-orders')">
+                    <img src="{% static 'images/orders.svg' %}" alt="Текущие заказы">
+                    <p>Текущие заказы</p>
+                </div>
+                <div class="block" onclick="showSection('order-history')">
+                    <img src="{% static 'images/history.svg' %}" alt="История заказов">
+                    <p>История заказов</p>
+                </div>
+                <div class="block" onclick="showSection('personal-data')">
+                    <img src="{% static 'images/pers.svg' %}" alt="Личные данные">
+                    <p>Личные данные</p>
+                </div>
+            </div>
+
+            <!-- Контейнеры для переключаемых секций -->
+            <div id="content-sections" style="display: none;">
+                <!-- Секция для Текущих заказов -->
+                <div id="current-orders" class="content-section">
+                    <h2>Текущие заказы</h2>
+                    {% if current_orders %}
+                        <div class="orders-list">
+                            {% for order in current_orders %}
+                                <div class="order-item">
+                                    <div class="order-header">
+                                        <div class="order-info">
+                                            <span>Заказ №{{ order.id }} от {{ order.Дата_создания|date:"d.m.Y" }}, {{ order.заказы_продукции|length }} товар на сумму {{ order.Общая_сумма }} ₽</span>
+                                        </div>
+                                        <div class="order-status">
+                                            <span>Статус: {{ order.Статус }}</span>
+                                        </div>
+                                    </div>
+                                    <!-- Детали заказа (скрыты по умолчанию) -->
+                                    <div class="order-details" id="order-details-{{ order.id }}" style="display: none;">
+                                        <div class="order-items">
+                                            {% for item in order.заказы_продукции %}
+                                                <div class="order-item-detail">
+                                                    <div class="product-info">
+                                                        <img src="{% if item.продукция.Изображение %}{{ item.продукция.Изображение }}{% else %}https://via.placeholder.com/50?text=Product+Image{% endif %}" alt="{{ item.продукция.Наименование|default:'Продукт' }}" onerror="this.src='https://via.placeholder.com/50?text=Product+Image';">
+                                                        <div class="product-text">
+                                                            <p><strong>Наименование:</strong> {{ item.продукция.Наименование|default:"Не указано" }}</p>
+                                                            <p><strong>Цена:</strong> {{ item.Стоимость }} ₽</p>
+                                                            <p><strong>Количество:</strong> {{ item.Количество }} шт</p>
+                                                            <p><strong>Сумма:</strong> {% widthratio item.Стоимость 1 item.Количество %} ₽</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                            <div class="order-total">
+                                                <span>Всего:</span>
+                                                <span>{{ order.Общая_сумма }} ₽</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Кнопки действий -->
+                                    <div class="order-actions">
+                                        <button class="action-button details-button" onclick="toggleOrderDetails('order-details-{{ order.id }}')">Подробнее о заказе</button>
+                                        <a href="{% url 'cancel_order' order.id %}" class="action-button cancel-button">Отменить заказ</a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p>У вас нет текущих заказов.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Секция для Истории заказов -->
+                <div id="order-history" class="content-section">
+                    <h2>История заказов</h2>
+                    {% if order_history %}
+                        <div class="orders-list">
+                            {% for order in order_history %}
+                                <div class="order-item">
+                                    <div class="order-header">
+                                        <div class="order-info">
+                                            <span>Заказ №{{ order.id }} от {{ order.Дата_создания|date:"d.m.Y" }}, {{ order.заказы_продукции|length }} товар на сумму {{ order.Общая_сумма }} ₽</span>
+                                        </div>
+                                        <div class="order-status">
+                                            <span>Статус: {{ order.Статус }}</span>
+                                        </div>
+                                    </div>
+                                    <!-- Детали заказа (скрыты по умолчанию) -->
+                                    <div class="order-details" id="order-details-{{ order.id }}" style="display: none;">
+                                        <div class="order-items">
+                                            {% for item in order.заказы_продукции %}
+                                                <div class="order-item-detail">
+                                                    <div class="product-info">
+                                                        <img src="{% if item.продукция.Изображение %}{{ item.продукция.Изображение }}{% else %}https://via.placeholder.com/50?text=Product+Image{% endif %}" alt="{{ item.продукция.Наименование|default:'Продукт' }}" onerror="this.src='https://via.placeholder.com/50?text=Product+Image';">
+                                                        <div class="product-text">
+                                                            <p><strong>Наименование:</strong> {{ item.продукция.Наименование|default:"Не указано" }}</p>
+                                                            <p><strong>Цена:</strong> {{ item.Стоимость }} ₽</p>
+                                                            <p><strong>Количество:</strong> {{ item.Количество }} шт</p>
+                                                            <p><strong>Сумма:</strong> {% widthratio item.Стоимость 1 item.Количество %} ₽</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                            <div class="order-total">
+                                                <span>Всего:</span>
+                                                <span>{{ order.Общая_сумма }} ₽</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Кнопки действий (только "Подробнее о заказе") -->
+                                    <div class="order-actions">
+                                        <button class="action-button details-button" onclick="toggleOrderDetails('order-details-{{ order.id }}')">Подробнее о заказе</button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p>У вас нет завершённых или отменённых заказов.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Секция для Личных данных -->
+                <div id="personal-data" class="content-section">
+                    <h2>Личные данные</h2>
+                    <form action="{% url 'update_personal_data' %}" method="POST">
+                        {% csrf_token %}
+                        <label for="наименование">Наименование организации</label>
+                        <input type="text" id="наименование" name="наименование" value="{{ partner.Наименование }}" required>
+
+                        <label for="инн">ИНН</label>
+                        <input type="text" id="инн" name="инн" value="{{ partner.ИНН }}" readonly>
+
+                        <label for="фио_директора">ФИО директора</label>
+                        <input type="text" id="фио_директора" name="фио_директора" value="{{ partner.ФИО_директора }}" required>
+
+                        <label for="телефон">Телефон</label>
+                        <input type="text" id="телефон" name="телефон" value="{{ partner.Телефон }}" required>
+
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" value="{{ partner.email }}" readonly>
+
+                        <label for="пароль">Пароль</label>
+                        <input type="password" id="пароль" name="пароль" placeholder="Введите новый пароль (необязательно)">
+
+                        <label for="места_продаж">Места продаж</label>
+                        <input type="text" id="места_продаж" name="места_продаж" value="{{ partner.Места_продаж }}" required>
+
+                        <label for="address-input">Юридический адрес</label>
+                        <input type="text" id="address-input" name="address" value="{{ partner.юридический_адрес.Регион }} {{ partner.юридический_адрес.Город }} {{ partner.юридический_адрес.Улица }} {{ partner.юридический_адрес.Дом }}" required>
+                        <div id="address-suggestions" class="suggestions" style="display: none;"></div>
+
+                        <!-- Скрытые поля для данных адреса -->
+                        <input type="hidden" id="индекс" name="индекс" value="{{ partner.юридический_адрес.Индекс }}" required>
+                        <input type="hidden" id="регион" name="регион" value="{{ partner.юридический_адрес.Регион }}" required>
+                        <input type="hidden" id="город" name="город" value="{{ partner.юридический_адрес.Город }}" required>
+                        <input type="hidden" id="улица" name="улица" value="{{ partner.юридический_адрес.Улица }}" required>
+                        <input type="hidden" id="дом" name="дом" value="{{ partner.юридический_адрес.Дом }}" required>
+
+                        <button type="submit" class="save-button">Сохранить данные</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Функция для переключения секций
+        function showSection(sectionId) {
+            // Показываем контейнер с секциями
+            const contentSections = document.getElementById('content-sections');
+            contentSections.style.display = 'block';
+
+            // Скрываем все секции
+            const sections = document.getElementsByClassName('content-section');
+            for (let i = 0; i < sections.length; i++) {
+                sections[i].style.display = 'none';
+            }
+
+            // Показываем выбранную секцию
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.style.display = 'block';
+            }
+
+            // Обновляем активный пункт в боковом меню
+            const sidebarItems = document.getElementsByClassName('sidebar-item');
+            for (let i = 0; i < sidebarItems.length; i++) {
+                sidebarItems[i].classList.remove('active');
+                if (sidebarItems[i].getAttribute('onclick') && sidebarItems[i].getAttribute('onclick').includes(sectionId)) {
+                    sidebarItems[i].classList.add('active');
+                }
+            }
+
+            // Обновляем активный блок
+            const blocks = document.getElementsByClassName('block');
+            for (let i = 0; i < blocks.length; i++) {
+                blocks[i].classList.remove('active');
+                if (blocks[i].getAttribute('onclick').includes(sectionId)) {
+                    blocks[i].classList.add('active');
+                }
+            }
+
+            // Скрываем блоки после выбора
+            const blocksContainer = document.querySelector('.personal-account-blocks');
+            blocksContainer.style.display = 'none';
+        }
+
+        // Функция для переключения деталей заказа
+        function toggleOrderDetails(orderId) {
+            const details = document.getElementById(orderId);
+            if (details.style.display === 'none' || details.style.display === '') {
+                details.style.display = 'block';
+            } else {
+                details.style.display = 'none';
+            }
+        }
+
+        // Интеграция с API DaData для автодополнения адреса
+        const addressInput = document.getElementById('address-input');
+        const suggestionsContainer = document.getElementById('address-suggestions');
+
+        if (addressInput && suggestionsContainer) {
+            addressInput.addEventListener('input', async () => {
+                const query = addressInput.value.trim();
+                if (query.length < 3) {
+                    suggestionsContainer.style.display = 'none';
+                    suggestionsContainer.innerHTML = '';
+                    return;
+                }
+
+                try {
+                    const response = await fetch('https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'Authorization': 'Token 045de845fe99870f9368b07ff0592323d0cd1edb'
+                        },
+                        body: JSON.stringify({ query: query })
+                    });
+
+                    const data = await response.json();
+                    suggestionsContainer.innerHTML = '';
+
+                    if (data.suggestions && data.suggestions.length > 0) {
+                        suggestionsContainer.style.display = 'block';
+                        data.suggestions.forEach(suggestion => {
+                            const suggestionItem = document.createElement('div');
+                            suggestionItem.classList.add('suggestion-item');
+                            suggestionItem.textContent = suggestion.value;
+                            suggestionItem.addEventListener('click', () => {
+                                addressInput.value = suggestion.value;
+                                // Заполняем скрытые поля данными из DaData
+                                document.getElementById('индекс').value = suggestion.data.postal_code || '';
+                                document.getElementById('регион').value = suggestion.data.region || '';
+                                document.getElementById('город').value = suggestion.data.city || suggestion.data.settlement || '';
+                                document.getElementById('улица').value = suggestion.data.street || '';
+                                document.getElementById('дом').value = suggestion.data.house || '';
+                                suggestionsContainer.style.display = 'none';
+                                suggestionsContainer.innerHTML = '';
+                            });
+                            suggestionsContainer.appendChild(suggestionItem);
+                        });
+                    } else {
+                        suggestionsContainer.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('Ошибка при запросе к DaData:', error);
+                    suggestionsContainer.innerHTML = '<div class="suggestion-item">Ошибка при загрузке адресов</div>';
+                    suggestionsContainer.style.display = 'block';
+                }
+            });
+
+            // Скрываем предложения при клике вне поля
+            document.addEventListener('click', (e) => {
+                if (!addressInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+                    suggestionsContainer.style.display = 'none';
+                    suggestionsContainer.innerHTML = '';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

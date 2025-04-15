@@ -1,0 +1,22 @@
+{% load static %}
+<div class="header">
+    <div class="logo">
+        <img src="{% static 'images/logo.svg' %}" alt="Bentonit">
+    </div>
+    <div class="nav-container">
+        <nav>
+            <a href="{% url 'product_list' %}">Продукция</a>
+            <a href="{% url 'about' %}">О компании</a>
+            <a href="{% url 'contacts' %}">Контакты</a>
+        </nav>
+    </div>
+    <div class="icons">
+        <a href="{% url 'cart' %}">
+            <img src="{% static 'images/cart.svg' %}" alt="Корзина">
+        </a>
+        <a href="{% if request.session.partner_id %}{% url 'personal_account' %}{% else %}{% url 'auth' %}{% endif %}">
+            <img src="{% static 'images/us.svg' %}" alt="Профиль">
+        </a>
+    </div>
+</div>
+<div class="header-border"></div>

@@ -5,28 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Авторизация</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/global.css' %}">
+    <link rel="stylesheet" href="{% static 'css/layout.css' %}">
 </head>
 <body>
-    <div class="header">
-        <div class="logo">
-            <img src="{% static 'images/logo.svg' %}" alt="БЕТОННЫЙ ЗАВОД Bentonit">
-        </div>
-        <nav>
-            <a href="{% url 'product_list' %}">Продукция</a>
-            <a href="{% url 'about' %}">О компании</a>
-            <a href="{% url 'contacts' %}">Контакты</a>
-        </nav>
-        <div class="icons">
-            <a href="{% url 'cart' %}">
-                <img src="{% static 'images/cart.png' %}" alt="Корзина">
-            </a>
-            <a href="{% url 'auth' %}">
-                <img src="{% static 'images/us.svg' %}" alt="Профиль">
-            </a>
-        </div>
-    </div>
-    <div class="header-border"></div>
+    {% include 'products/header.html' %}
 
     <div class="container">
         <h1>Авторизация</h1>
@@ -77,8 +60,8 @@
                         {% endfor %}
                     </select>
 
-                    <label for="address-input">Введите адрес</label>
-                    <input type="text" id="address-input" name="address" placeholder="Начните вводить адрес" required>
+                    <label for="address-input">Юридический адрес</label>
+                    <input type="text" id="address-input" name="address" placeholder="Введите адрес" required>
                     <div id="address-suggestions" class="suggestions" style="display: none;"></div>
 
                     <!-- Скрытые поля для данных адреса -->
@@ -90,7 +73,7 @@
 
                     <div class="auth-buttons">
                         <button type="submit" class="register-button">Зарегистрироваться</button>
-                        <button type="button" class="login-button" onclick="window.location.href='{% url 'auth' %}'">Назад к авторизации</button>
+                        <button type="button" class="login-button" onclick="window.location.href='{% url 'auth' %}{% if next %}?next={{ next }}{% endif %}'">Назад к авторизации</button>
                     </div>
                 </form>
             {% else %}
@@ -101,9 +84,13 @@
                     <input type="email" id="email" name="email" placeholder="Введите email" required>
                     <label for="password">Пароль</label>
                     <input type="password" id="password" name="password" placeholder="Введите пароль" required>
+                    <!-- Скрытое поле для параметра next -->
+                    {% if next %}
+                        <input type="hidden" name="next" value="{{ next }}">
+                    {% endif %}
                     <div class="auth-buttons">
                         <button type="submit" class="login-button">Войти</button>
-                        <button type="button" class="register-button" onclick="window.location.href='{% url 'register' %}'">Зарегистрироваться</button>
+                        <button type="button" class="register-button" onclick="window.location.href='{% url 'register' %}{% if next %}?next={{ next }}{% endif %}'">Зарегистрироваться</button>
                     </div>
                 </form>
             {% endif %}
@@ -129,7 +116,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
-                        'Authorization': 'Token 045de845fe99870f9368b07ff0592323d0cd1edb' // Замените YOUR_DADATA_API_KEY на ваш API-ключ
+                        'Authorization': 'Token 045de845fe99870f9368b07ff0592323d0cd1edb'
                     },
                     body: JSON.stringify({ query: query })
                 });

@@ -1,0 +1,99 @@
+.header {
+    background-color: white;
+    color: #333;
+    padding: 10px 200px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+
+.header-border {
+    background-color: #333;
+    height: 30px;
+    width: 100%;
+}
+
+.header .logo img {
+    height: 60px;
+}
+
+.nav-container {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.header nav {
+    display: flex;
+    gap: 20px;
+}
+
+.header nav a {
+    color: #333;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: normal;
+}
+
+.header nav a.active {
+    font-weight: bold;
+}
+
+.header .icons img {
+    height: 40px;
+    margin-left: 35px;
+}
+
+.sidebar {
+    width: 200px;
+    flex-shrink: 0;
+    margin-top: 50px;
+}
+
+.sidebar h3 {
+    background-color: #AE1022;
+    color: #fff;
+    padding: 10px;
+    margin: 0;
+    text-align: center;
+    border-radius: 8px 8px 0 0;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+}
+
+.sidebar-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #ddd;
+}
+
+.sidebar-item:last-child {
+    border-bottom: none;
+}
+
+.sidebar-item:hover {
+    background-color: #f0f0f0;
+}
+
+.sidebar-item.active {
+    background-color: #AE1022;
+    color: #fff;
+}
+
+.header .icons a {
+    text-decoration: none;
+}
+
+.header .icons img {
+    height: 40px;
+    margin-left: 35px;
+}

@@ -19,11 +19,11 @@ class LegalAddress(Base):
     __tablename__ = 'юридический_адрес'
 
     id = Column(Integer, primary_key=True)
-    Индекс = Column(Integer)
-    Регион = Column(String)
-    Город = Column(String)
-    Улица = Column(String)
-    Дом = Column(Integer)
+    Индекс = Column(Integer, nullable=False)  # Обязательное поле
+    Регион = Column(String, nullable=False)  # Обязательное поле
+    Город = Column(String, nullable=False)   # Обязательное поле
+    Улица = Column(String, nullable=False)   # Обязательное поле
+    Дом = Column(Integer, nullable=False)    # Обязательное поле
 
     склады = relationship("Warehouse", back_populates="юридический_адрес")
     партнеры = relationship("Partner", back_populates="юридический_адрес")
@@ -241,8 +241,9 @@ class Order(Base):
     Статус = Column(String)
     id_сотрудник = Column(Integer, ForeignKey('сотрудник.id'))
     id_партнер = Column(Integer, ForeignKey('партнер.id'))
-    Предоплата = Column(Float)
-    Согласована = Column(Boolean)
+    Способ_оплаты = Column(String)
+    Общая_сумма = Column(Float)
+    Комментарий = Column(String)
 
     сотрудник = relationship("Employee", back_populates="заказы")
     партнер = relationship("Partner", back_populates="заказы")
