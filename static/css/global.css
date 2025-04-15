@@ -477,3 +477,39 @@ h1 {
     color: #721c24;
     border: 1px solid #f5c6cb;
 }
+
+/* Стили для поля ввода количества */
+.quantity {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.quantity-input {
+    width: 50px;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    text-align: center;
+    font-size: 16px;
+}
+
+.quantity-input::-webkit-inner-spin-button,
+.quantity-input::-webkit-outer-spin-button {
+    -webkit-appearance: none; /* Убираем стрелки в Chrome */
+    margin: 0;
+}
+
+/* Стили для кнопок */
+.quantity button {
+    background-color: #ddd;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 16px;
+}
+
+.quantity button:hover {
+    background-color: #ccc;
+}

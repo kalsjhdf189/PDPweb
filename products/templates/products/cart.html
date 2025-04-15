@@ -44,7 +44,7 @@
             checkoutButton.disabled = false;
             checkoutLink.style.pointerEvents = 'auto';
 
-            cart.forEach(item => {
+            cart.forEach((item, index) => {
                 const cartItem = document.createElement('div');
                 cartItem.classList.add('cart-item');
 
@@ -53,10 +53,10 @@
                     <img src="${item.image}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/50?text=Product+Image';">
                     <!-- Название -->
                     <span class="cart-item-name">${item.name}</span>
-                    <!-- Счётчик -->
+                    <!-- Счётчик с полем ввода и кнопками -->
                     <div class="quantity">
                         <button class="decrease">-</button>
-                        <span>${item.quantity}</span>
+                        <input type="number" class="quantity-input" value="${item.quantity}" min="1" step="1">
                         <button class="increase">+</button>
                     </div>
                     <!-- Цена -->
@@ -69,11 +69,9 @@
                 cartItem.querySelector('.decrease').addEventListener('click', () => {
                     if (item.quantity > 1) {
                         item.quantity -= 1;
-                    } else {
-                        cart.splice(cart.indexOf(item), 1); // Удаляем товар, если количество становится 0
+                        localStorage.setItem('cart', JSON.stringify(cart));
+                        displayCartItems(); // Обновляем отображение
                     }
-                    localStorage.setItem('cart', JSON.stringify(cart));
-                    displayCartItems(); // Обновляем отображение
                 });
 
                 // Обработчик для кнопки увеличения количества
@@ -83,9 +81,26 @@
                     displayCartItems(); // Обновляем отображение
                 });
 
+                // Обработчик для поля ввода количества
+                const quantityInput = cartItem.querySelector('.quantity-input');
+                quantityInput.addEventListener('input', () => {
+                    let newQuantity = parseInt(quantityInput.value);
+
+                    // Валидация ввода
+                    if (isNaN(newQuantity) || newQuantity < 1) {
+                        newQuantity = 1;
+                        quantityInput.value = newQuantity;
+                    }
+
+                    // Обновляем количество в корзине
+                    item.quantity = newQuantity;
+                    localStorage.setItem('cart', JSON.stringify(cart));
+                    displayCartItems(); // Перерисовываем корзину
+                });
+
                 // Обработчик для кнопки удаления
                 cartItem.querySelector('.remove-item').addEventListener('click', () => {
-                    cart.splice(cart.indexOf(item), 1);
+                    cart.splice(index, 1);
                     localStorage.setItem('cart', JSON.stringify(cart));
                     displayCartItems(); // Обновляем отображение
                 });
