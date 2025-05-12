@@ -36,8 +36,7 @@ class WarehouseType(Base):
     Наименование = Column(String)
 
     склады = relationship("Warehouse", back_populates="тип")
-
-
+    
 class Warehouse(Base):
     __tablename__ = 'склад'
 
@@ -233,22 +232,52 @@ class Partner(Base):
     тип = relationship("PartnerType", back_populates="партнеры")
     заказы = relationship("Order", back_populates="партнер")
 
+class Delivery_method(Base):
+    __tablename__ = "способ_доставки"
+    
+    id = Column(Integer, primary_key=True)
+    Наименование = Column(String)
+    Вместимость = Column(String)
+    Базовая_стоимость = Column(Float)
+    Стоимость_за_кг = Column(Float)
+
+class Delivery(Base):
+    __tablename__ = "доставка"
+    
+    id = Column(Integer, primary_key=True)
+    id_способ_доставки = Column(Integer, ForeignKey('способ_доставки.id'))
+    id_юр_адрес = Column(Integer, ForeignKey('юридический_адрес.id'))
+    Статус = Column(String)
+    Стоимость = Column(Float)
+    
+    способ_доставки = relationship("Delivery_method")
+    юридический_адрес = relationship("LegalAddress")
+    
+class Payment(Base):
+    __tablename__ = "оплата"
+    
+    id = Column(Integer, primary_key=True)
+    Дата_оплаты = Column(DateTime)
+    Статус = Column(String)
+    Сумма = Column(Float)
+
 class Order(Base):
     __tablename__ = 'заказ'
 
     id = Column(Integer, primary_key=True)
-    Дата_создания = Column(Date)
+    Дата_создания = Column(DateTime)
     Статус = Column(String)
     id_сотрудник = Column(Integer, ForeignKey('сотрудник.id'))
     id_партнер = Column(Integer, ForeignKey('партнер.id'))
-    Способ_оплаты = Column(String)
-    Общая_сумма = Column(Float)
+    id_доставка = Column(Integer, ForeignKey('доставка.id'))
+    id_оплата = Column(Integer, ForeignKey('оплата.id'))
     Комментарий = Column(String)
 
     сотрудник = relationship("Employee", back_populates="заказы")
     партнер = relationship("Partner", back_populates="заказы")
     заказы_продукции = relationship("OrderProduct", back_populates="заказ")
-
+    оплата = relationship("Payment")
+    доставка = relationship("Delivery")
 
 class OrderProduct(Base):
     __tablename__ = 'заказ_продукции'

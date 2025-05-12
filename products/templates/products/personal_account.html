@@ -13,7 +13,6 @@
     {% include 'products/header.html' %}
 
     <div class="container">
-        <!-- Левое меню -->
         <div class="sidebar">
             <h3>Мой кабинет</h3>
             <ul>
@@ -29,11 +28,9 @@
             </ul>
         </div>
 
-        <!-- Основной контент -->
         <div class="main-content">
             <h1>Личный кабинет</h1>
 
-            <!-- Вывод сообщений об успехе или ошибке -->
             {% if messages %}
                 <div class="messages">
                     {% for message in messages %}
@@ -44,7 +41,6 @@
                 </div>
             {% endif %}
 
-            <!-- Блоки личного кабинета -->
             <div class="personal-account-blocks">
                 <div class="block" onclick="showSection('current-orders')">
                     <img src="{% static 'images/orders.svg' %}" alt="Текущие заказы">
@@ -60,9 +56,7 @@
                 </div>
             </div>
 
-            <!-- Контейнеры для переключаемых секций -->
             <div id="content-sections" style="display: none;">
-                <!-- Секция для Текущих заказов -->
                 <div id="current-orders" class="content-section">
                     <h2>Текущие заказы</h2>
                     {% if current_orders %}
@@ -71,13 +65,12 @@
                                 <div class="order-item">
                                     <div class="order-header">
                                         <div class="order-info">
-                                            <span>Заказ №{{ order.id }} от {{ order.Дата_создания|date:"d.m.Y" }}, {{ order.заказы_продукции|length }} товар на сумму {{ order.Общая_сумма }} ₽</span>
+                                            <span>Заказ №{{ order.id }} от {{ order.Дата_создания|date:"d.m.Y" }}, {{ order.заказы_продукции|length }} товар(ов) на сумму {{ order.оплата.Сумма }} ₽</span>
                                         </div>
                                         <div class="order-status">
                                             <span>Статус: {{ order.Статус }}</span>
                                         </div>
                                     </div>
-                                    <!-- Детали заказа (скрыты по умолчанию) -->
                                     <div class="order-details" id="order-details-{{ order.id }}" style="display: none;">
                                         <div class="order-items">
                                             {% for item in order.заказы_продукции %}
@@ -93,13 +86,38 @@
                                                     </div>
                                                 </div>
                                             {% endfor %}
+                                            <div class="order-payment-detail">
+                                                <div class="payment-info">
+                                                    <div class="payment-text">
+                                                        <p><strong>Сумма к оплате:</strong> {{ order.оплата.Сумма }} ₽</p>
+                                                        <p><strong></strong> <span class="payment-status {% if order.оплата.Статус == 'Не оплачен' %}payment-status-unpaid
+                                                            {% else %}payment-status-paid{% endif %}">{{ order.оплата.Статус }}</span></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="order-delivery-detail">
+                                                <div class="delivery-info">
+                                                    <div class="delivery-text">
+                                                        <p><strong>Способ доставки:</strong> {{ order.доставка.способ_доставки.Наименование }}</p>
+                                                        <p><strong>Статус доставки:</strong> {{ order.доставка.Статус }}</p>
+                                                        <p><strong>Адрес доставки:</strong> {{ order.доставка.юридический_адрес.Регион }} {{ order.доставка.юридический_адрес.Город }} {{ order.доставка.юридический_адрес.Улица }} {{ order.доставка.юридический_адрес.Дом }}{% if order.доставка.юридический_адрес.Индекс %}, {{ order.доставка.юридический_адрес.Индекс }}{% endif %}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="order-subtotal">
+                                                <span>Товара на:</span>
+                                                <span>{{ order.subtotal }} ₽</span>
+                                            </div>
+                                            <div class="order-delivery-cost">
+                                                <span>Стоимость доставки:</span>
+                                                <span>{{ order.доставка.Стоимость }} ₽</span>
+                                            </div>
                                             <div class="order-total">
                                                 <span>Всего:</span>
-                                                <span>{{ order.Общая_сумма }} ₽</span>
+                                                <span>{{ order.оплата.Сумма }} ₽</span>
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- Кнопки действий -->
                                     <div class="order-actions">
                                         <button class="action-button details-button" onclick="toggleOrderDetails('order-details-{{ order.id }}')">Подробнее о заказе</button>
                                         <a href="{% url 'cancel_order' order.id %}" class="action-button cancel-button">Отменить заказ</a>
@@ -112,7 +130,6 @@
                     {% endif %}
                 </div>
 
-                <!-- Секция для Истории заказов -->
                 <div id="order-history" class="content-section">
                     <h2>История заказов</h2>
                     {% if order_history %}
@@ -121,35 +138,59 @@
                                 <div class="order-item">
                                     <div class="order-header">
                                         <div class="order-info">
-                                            <span>Заказ №{{ order.id }} от {{ order.Дата_создания|date:"d.m.Y" }}, {{ order.заказы_продукции|length }} товар на сумму {{ order.Общая_сумма }} ₽</span>
+                                            <span>Заказ №{{ order.id }} от {{ order.Дата_создания|date:"d.m.Y" }}, {{ order.заказы_продукции|length }} товар на сумму {{ order.оплата.Сумма }} ₽</span>
                                         </div>
                                         <div class="order-status">
                                             <span>Статус: {{ order.Статус }}</span>
                                         </div>
                                     </div>
-                                    <!-- Детали заказа (скрыты по умолчанию) -->
                                     <div class="order-details" id="order-details-{{ order.id }}" style="display: none;">
                                         <div class="order-items">
                                             {% for item in order.заказы_продукции %}
-                                                <div class="order-item-detail">
-                                                    <div class="product-info">
-                                                        <img src="{% if item.продукция.Изображение %}{{ item.продукция.Изображение }}{% else %}https://via.placeholder.com/50?text=Product+Image{% endif %}" alt="{{ item.продукция.Наименование|default:'Продукт' }}" onerror="this.src='https://via.placeholder.com/50?text=Product+Image';">
-                                                        <div class="product-text">
-                                                            <p><strong>Наименование:</strong> {{ item.продукция.Наименование|default:"Не указано" }}</p>
-                                                            <p><strong>Цена:</strong> {{ item.Стоимость }} ₽</p>
-                                                            <p><strong>Количество:</strong> {{ item.Количество }} шт</p>
-                                                            <p><strong>Сумма:</strong> {% widthratio item.Стоимость 1 item.Количество %} ₽</p>
-                                                        </div>
+                                            <div class="order-item-detail">
+                                                <div class="product-info">
+                                                    <img src="{% if item.продукция.Изображение %}{{ item.продукция.Изображение }}{% else %}https://via.placeholder.com/50?text=Product+Image{% endif %}" alt="{{ item.продукция.Наименование|default:'Продукт' }}" onerror="this.src='https://via.placeholder.com/50?text=Product+Image';">
+                                                    <div class="product-text">
+                                                        <p><strong>Наименование:</strong> {{ item.продукция.Наименование|default:"Не указано" }}</p>
+                                                        <p><strong>Цена:</strong> {{ item.Стоимость }} ₽</p>
+                                                        <p><strong>Количество:</strong> {{ item.Количество }} шт</p>
+                                                        <p><strong>Сумма:</strong> {% widthratio item.Стоимость 1 item.Количество %} ₽</p>
                                                     </div>
                                                 </div>
-                                            {% endfor %}
-                                            <div class="order-total">
-                                                <span>Всего:</span>
-                                                <span>{{ order.Общая_сумма }} ₽</span>
+                                            </div>
+                                        {% endfor %}
+                                        <div class="order-payment-detail">
+                                            <div class="payment-info">
+                                                <div class="payment-text">
+                                                    <p><strong>Сумма к оплате:</strong> {{ order.оплата.Сумма }}</p>
+                                                    <p><strong></strong> <span class="payment-status {% if order.оплата.Статус == 'Не оплачен' %}payment-status-unpaid
+                                                        {% else %}payment-status-paid{% endif %}">{{ order.оплата.Статус }}</span></p>
+                                                </div>
                                             </div>
                                         </div>
+                                        <div class="order-delivery-detail">
+                                            <div class="delivery-info">
+                                                <div class="delivery-text">
+                                                    <p><strong>Способ доставки:</strong> {{ order.доставка.способ_доставки.Наименование }}</p>
+                                                    <p><strong>Статус доставки:</strong> {{ order.доставка.Статус }}</p>
+                                                    <p><strong>Адрес доставки:</strong> {{ order.доставка.юридический_адрес.Регион }} {{ order.доставка.юридический_адрес.Город }} {{ order.доставка.юридический_адрес.Улица }} {{ order.доставка.юридический_адрес.Дом }}{% if order.доставка.юридический_адрес.Индекс %}, {{ order.доставка.юридический_адрес.Индекс }}{% endif %}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="order-subtotal">
+                                            <span>Товара на:</span>
+                                            <span>{{ order.subtotal }} ₽</span>
+                                        </div>
+                                        <div class="order-delivery-cost">
+                                            <span>Стоимость доставки:</span>
+                                            <span>{{ order.доставка.Стоимость }} ₽</span>
+                                        </div>
+                                        <div class="order-total">
+                                            <span>Всего:</span>
+                                            <span>{{ order.оплата.Сумма }} ₽</span>
+                                        </div>
+                                        </div>
                                     </div>
-                                    <!-- Кнопки действий (только "Подробнее о заказе") -->
                                     <div class="order-actions">
                                         <button class="action-button details-button" onclick="toggleOrderDetails('order-details-{{ order.id }}')">Подробнее о заказе</button>
                                     </div>
@@ -161,7 +202,6 @@
                     {% endif %}
                 </div>
 
-                <!-- Секция для Личных данных -->
                 <div id="personal-data" class="content-section">
                     <h2>Личные данные</h2>
                     <form action="{% url 'update_personal_data' %}" method="POST">
@@ -191,7 +231,6 @@
                         <input type="text" id="address-input" name="address" value="{{ partner.юридический_адрес.Регион }} {{ partner.юридический_адрес.Город }} {{ partner.юридический_адрес.Улица }} {{ partner.юридический_адрес.Дом }}" required>
                         <div id="address-suggestions" class="suggestions" style="display: none;"></div>
 
-                        <!-- Скрытые поля для данных адреса -->
                         <input type="hidden" id="индекс" name="индекс" value="{{ partner.юридический_адрес.Индекс }}" required>
                         <input type="hidden" id="регион" name="регион" value="{{ partner.юридический_адрес.Регион }}" required>
                         <input type="hidden" id="город" name="город" value="{{ partner.юридический_адрес.Город }}" required>
@@ -206,25 +245,20 @@
     </div>
 
     <script>
-        // Функция для переключения секций
         function showSection(sectionId) {
-            // Показываем контейнер с секциями
             const contentSections = document.getElementById('content-sections');
             contentSections.style.display = 'block';
 
-            // Скрываем все секции
             const sections = document.getElementsByClassName('content-section');
             for (let i = 0; i < sections.length; i++) {
                 sections[i].style.display = 'none';
             }
 
-            // Показываем выбранную секцию
             const section = document.getElementById(sectionId);
             if (section) {
                 section.style.display = 'block';
             }
 
-            // Обновляем активный пункт в боковом меню
             const sidebarItems = document.getElementsByClassName('sidebar-item');
             for (let i = 0; i < sidebarItems.length; i++) {
                 sidebarItems[i].classList.remove('active');
@@ -233,7 +267,6 @@
                 }
             }
 
-            // Обновляем активный блок
             const blocks = document.getElementsByClassName('block');
             for (let i = 0; i < blocks.length; i++) {
                 blocks[i].classList.remove('active');
@@ -242,12 +275,10 @@
                 }
             }
 
-            // Скрываем блоки после выбора
             const blocksContainer = document.querySelector('.personal-account-blocks');
             blocksContainer.style.display = 'none';
         }
 
-        // Функция для переключения деталей заказа
         function toggleOrderDetails(orderId) {
             const details = document.getElementById(orderId);
             if (details.style.display === 'none' || details.style.display === '') {
@@ -257,7 +288,6 @@
             }
         }
 
-        // Интеграция с API DaData для автодополнения адреса
         const addressInput = document.getElementById('address-input');
         const suggestionsContainer = document.getElementById('address-suggestions');
 
@@ -292,7 +322,6 @@
                             suggestionItem.textContent = suggestion.value;
                             suggestionItem.addEventListener('click', () => {
                                 addressInput.value = suggestion.value;
-                                // Заполняем скрытые поля данными из DaData
                                 document.getElementById('индекс').value = suggestion.data.postal_code || '';
                                 document.getElementById('регион').value = suggestion.data.region || '';
                                 document.getElementById('город').value = suggestion.data.city || suggestion.data.settlement || '';
@@ -313,7 +342,6 @@
                 }
             });
 
-            // Скрываем предложения при клике вне поля
             document.addEventListener('click', (e) => {
                 if (!addressInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
                     suggestionsContainer.style.display = 'none';

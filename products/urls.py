@@ -16,4 +16,5 @@ urlpatterns = [
     path('update-personal-data/', views.update_personal_data, name='update_personal_data'),
     path('cancel-order/<int:order_id>/', views.cancel_order, name='cancel_order'),
     path('logout/', LogoutView.as_view(next_page='auth'), name='logout'),
+    path('calculate-delivery-cost/', views.calculate_delivery_cost, name='calculate_delivery_cost'),
 ]

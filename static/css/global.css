@@ -478,7 +478,6 @@ h1 {
     border: 1px solid #f5c6cb;
 }
 
-/* Стили для поля ввода количества */
 .quantity {
     display: flex;
     align-items: center;
@@ -496,7 +495,7 @@ h1 {
 
 .quantity-input::-webkit-inner-spin-button,
 .quantity-input::-webkit-outer-spin-button {
-    -webkit-appearance: none; /* Убираем стрелки в Chrome */
+    -webkit-appearance: none;
     margin: 0;
 }
 
@@ -512,4 +511,17 @@ h1 {
 
 .quantity button:hover {
     background-color: #ccc;
+}
+
+.order-subtotal, .order-delivery-cost, .order-total {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0;
+}
+
+.error-message {
+    color: red;
+    font-size: 0.9em;
+    margin-top: 5px;
+    display: none;
 }

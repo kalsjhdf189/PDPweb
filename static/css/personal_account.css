@@ -237,6 +237,8 @@ form input {
     gap: 10px;
 }
 
+.order-payment-detail,
+.order-delivery-detail,
 .order-item-detail {
     display: flex;
     flex-direction: column;
@@ -244,6 +246,8 @@ form input {
     border-bottom: 1px solid #ddd;
 }
 
+.payment-info,
+.delivery-info,
 .product-info {
     display: flex;
     align-items: center;
@@ -257,6 +261,8 @@ form input {
     flex-shrink: 0;
 }
 
+.payment-text,
+.delivery-text,
 .product-text {
     flex: 1;
     font-size: 14px;
@@ -266,9 +272,33 @@ form input {
     margin: 5px 0;
 }
 
+.order-subtotal,
+.order-delivery-cost,
 .order-total {
     display: flex;
     justify-content: space-between;
-    padding: 20px 0;
+    font-size: 14px;
+}
+
+.order-total {
     font-weight: bold;
+}
+
+.payment-status {
+    display: inline-block;
+    padding: 4px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.payment-status-unpaid {
+    color: #ff0000;
+    border-color: #ff0000;
+}
+
+.payment-status-paid {
+    color: #008000;
+    border-color: #008000;
 }
