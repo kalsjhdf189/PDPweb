@@ -17,7 +17,9 @@
         {% if messages %}
             <div class="messages">
                 {% for message in messages %}
-                    <div class="message {{ message.tags }}">{{ message }}</div>
+                    <div class="message {% if message.tags == 'success' %}success{% else %}error{% endif %}">
+                        {{ message }}
+                    </div>
                 {% endfor %}
             </div>
         {% endif %}
@@ -28,7 +30,6 @@
                     {% csrf_token %}
                     <input type="hidden" name="cart" id="cart-data">
 
-                    <!-- Способ доставки -->
                     <label for="delivery_method">Способ доставки</label>
                     <select id="delivery_method" name="delivery_method" required>
                         <option value="" disabled selected>Выберите способ доставки</option>
@@ -37,7 +38,6 @@
                         {% endfor %}
                     </select>
 
-                    <!-- Адрес доставки -->
                     <label for="delivery-address">Адрес доставки</label>
                     <input type="text" id="delivery-address" name="delivery_address" placeholder="Введите адрес доставки" required>
                     <div id="address-error" class="error-message">Введен неверный формат адреса!</div>
@@ -48,7 +48,6 @@
                     <input type="hidden" id="улица" name="улица" required>
                     <input type="hidden" id="дом" name="дом" required>
 
-                    <!-- Комментарий к заказу -->
                     <label for="comment">Комментарий к заказу</label>
                     <textarea id="comment" name="comment" placeholder="Введите ваш комментарий (необязательно)"></textarea>
                 </form>
@@ -155,7 +154,7 @@
         if (addressInput && suggestionsContainer) {
             addressInput.addEventListener('input', async () => {
                 const query = addressInput.value.trim();
-                addressError.style.display = 'none'; // Скрыть ошибку при вводе
+                addressError.style.display = 'none';
                 if (query.length < 3) {
                     suggestionsContainer.style.display = 'none';
                     suggestionsContainer.innerHTML = '';
@@ -191,7 +190,7 @@
                                 document.getElementById('дом').value = suggestion.data.house || '';
                                 suggestionsContainer.style.display = 'none';
                                 suggestionsContainer.innerHTML = '';
-                                addressError.style.display = 'none'; // Скрыть ошибку при выборе адреса
+                                addressError.style.display = 'none';
                             });
                             suggestionsContainer.appendChild(suggestionItem);
                         });

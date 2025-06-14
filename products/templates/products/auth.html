@@ -14,7 +14,6 @@
     <div class="container">
         <h1>Авторизация</h1>
 
-        <!-- Вывод сообщений об успехе или ошибке -->
         {% if messages %}
             <div class="messages">
                 {% for message in messages %}
@@ -25,16 +24,22 @@
             </div>
         {% endif %}
 
-        <!-- Форма авторизации или регистрации -->
         <div class="auth-form" id="auth-form">
             {% if show_register_form %}
-                <!-- Форма регистрации -->
+
                 <form action="{% url 'register' %}" method="POST">
                     {% csrf_token %}
                     <h2>Регистрация</h2>
                     <label for="наименование">Наименование организации</label>
                     <input type="text" id="наименование" name="наименование" placeholder="Введите наименование" required>
-
+                    
+                    <label for="тип_партнера">Тип клиента</label>
+                    <select id="тип_партнера" name="тип_партнера" required>
+                        {% for partner_type in partner_types %}
+                            <option value="{{ partner_type.id }}">{{ partner_type.Наименование }}</option>
+                        {% endfor %}
+                    </select>
+                    
                     <label for="инн">ИНН</label>
                     <input type="text" id="инн" name="инн" placeholder="Введите ИНН" required>
 
@@ -53,10 +58,10 @@
                     <label for="места_продаж">Места продаж</label>
                     <input type="text" id="места_продаж" name="места_продаж" placeholder="Введите места продаж" required>
 
-                    <label for="тип_партнера">Тип партнёра</label>
-                    <select id="тип_партнера" name="тип_партнера" required>
-                        {% for partner_type in partner_types %}
-                            <option value="{{ partner_type.id }}">{{ partner_type.Наименование }}</option>
+                    <label for="сфера_применения">Сфера применения:</label>
+                    <select name="сфера_применения" id="сфера_применения" required>
+                        {% for scope in scope_applications %}
+                            <option value="{{ scope.id }}">{{ scope.Наименование }}</option>
                         {% endfor %}
                     </select>
 
@@ -64,27 +69,38 @@
                     <input type="text" id="address-input" name="address" placeholder="Введите адрес" required>
                     <div id="address-suggestions" class="suggestions" style="display: none;"></div>
 
-                    <!-- Скрытые поля для данных адреса -->
                     <input type="hidden" id="индекс" name="индекс">
                     <input type="hidden" id="регион" name="регион">
                     <input type="hidden" id="город" name="город">
                     <input type="hidden" id="улица" name="улица">
                     <input type="hidden" id="дом" name="дом">
 
+                    <label class="checkbox-consent">
+                        <input type="checkbox" id="consent-checkbox">
+                        <span>Я даю согласие на обработку моих персональных данных (№ 152-ФЗ «О персональных данных»)</span>
+                    </label>
+
                     <div class="auth-buttons">
-                        <button type="submit" class="register-button">Зарегистрироваться</button>
+                        <button type="submit" class="register-button" id="register-button" disabled>Зарегистрироваться</button>
                         <button type="button" class="login-button" onclick="window.location.href='{% url 'auth' %}{% if next %}?next={{ next }}{% endif %}'">Назад к авторизации</button>
                     </div>
+
+                    <script>
+                        const consentCheckbox = document.getElementById('consent-checkbox');
+                        const registerButton = document.getElementById('register-button');
+                    
+                        consentCheckbox.addEventListener('change', () => {
+                            registerButton.disabled = !consentCheckbox.checked;
+                        });
+                    </script>
                 </form>
             {% else %}
-                <!-- Форма авторизации -->
                 <form action="{% url 'auth' %}" method="POST">
                     {% csrf_token %}
                     <label for="email">Email</label>
                     <input type="email" id="email" name="email" placeholder="Введите email" required>
                     <label for="password">Пароль</label>
                     <input type="password" id="password" name="password" placeholder="Введите пароль" required>
-                    <!-- Скрытое поле для параметра next -->
                     {% if next %}
                         <input type="hidden" name="next" value="{{ next }}">
                     {% endif %}
@@ -98,7 +114,6 @@
     </div>
 
     <script>
-        // Интеграция с API DaData для автодополнения адреса
         const addressInput = document.getElementById('address-input');
         const suggestionsContainer = document.getElementById('address-suggestions');
 
@@ -132,7 +147,6 @@
                         suggestionItem.textContent = suggestion.value;
                         suggestionItem.addEventListener('click', () => {
                             addressInput.value = suggestion.value;
-                            // Заполняем скрытые поля данными из DaData
                             document.getElementById('индекс').value = suggestion.data.postal_code || '';
                             document.getElementById('регион').value = suggestion.data.region || '';
                             document.getElementById('город').value = suggestion.data.city || suggestion.data.settlement || '';
@@ -153,13 +167,44 @@
             }
         });
 
-        // Скрываем предложения при клике вне поля
         document.addEventListener('click', (e) => {
             if (!addressInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
                 suggestionsContainer.style.display = 'none';
                 suggestionsContainer.innerHTML = '';
             }
         });
+    </script>
+
+    <script>
+        const partnerTypeSelect = document.getElementById('тип_партнера');
+        const innField = document.getElementById('инн');
+
+        function updateInnField() {
+            const selectedOption = partnerTypeSelect.options[partnerTypeSelect.selectedIndex].text;
+            if (selectedOption === 'Юридическое лицо') {
+                innField.setAttribute('maxlength', '10');
+                innField.placeholder = 'Введите 10 цифр';
+            } else if (selectedOption === 'Индивидуальный предприниматель') {
+                innField.setAttribute('maxlength', '12');
+                innField.placeholder = 'Введите 12 цифр';
+            } else {
+                innField.removeAttribute('maxlength');
+                innField.placeholder = '';
+            }
+            // Очистить поле ИНН при смене типа, чтобы избежать некорректного ввода
+            innField.value = '';
+        }
+
+        // Ограничить ввод только цифрами
+        innField.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+        // Установить начальное значение при загрузке страницы
+        updateInnField();
+
+        // Обновлять поле ИНН при изменении типа партнера
+        partnerTypeSelect.addEventListener('change', updateInnField);
     </script>
 </body>
 </html>

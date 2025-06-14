@@ -14,7 +14,6 @@
     <div class="container">
         <h1>Корзина</h1>
         <div class="cart-items">
-            <!-- Список товаров будет добавлен через JavaScript -->
         </div>
         <a href="{% url 'checkout' %}" id="checkout-link">
             <button class="checkout-button" id="checkout-button">Оформить заказ</button>
@@ -22,25 +21,21 @@
     </div>
 
     <script>
-        // Функция для отображения товаров в корзине
         function displayCartItems() {
             const cartItemsContainer = document.querySelector('.cart-items');
             const checkoutButton = document.getElementById('checkout-button');
             const checkoutLink = document.getElementById('checkout-link');
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-            // Очищаем контейнер перед добавлением элементов
             cartItemsContainer.innerHTML = '';
 
-            // Проверяем, пуста ли корзина
             if (cart.length === 0) {
                 cartItemsContainer.innerHTML = '<p>Корзина пуста.</p>';
-                checkoutButton.disabled = true; // Делаем кнопку неактивной
-                checkoutLink.style.pointerEvents = 'none'; // Отключаем кликабельность ссылки
+                checkoutButton.disabled = true;
+                checkoutLink.style.pointerEvents = 'none';
                 return;
             }
 
-            // Если корзина не пуста, активируем кнопку
             checkoutButton.disabled = false;
             checkoutLink.style.pointerEvents = 'auto';
 
@@ -65,51 +60,44 @@
                     <button class="remove-item">×</button>
                 `;
 
-                // Обработчик для кнопки уменьшения количества
                 cartItem.querySelector('.decrease').addEventListener('click', () => {
                     if (item.quantity > 1) {
                         item.quantity -= 1;
                         localStorage.setItem('cart', JSON.stringify(cart));
-                        displayCartItems(); // Обновляем отображение
+                        displayCartItems();
                     }
                 });
 
-                // Обработчик для кнопки увеличения количества
                 cartItem.querySelector('.increase').addEventListener('click', () => {
                     item.quantity += 1;
                     localStorage.setItem('cart', JSON.stringify(cart));
-                    displayCartItems(); // Обновляем отображение
+                    displayCartItems();
                 });
 
-                // Обработчик для поля ввода количества
                 const quantityInput = cartItem.querySelector('.quantity-input');
-                quantityInput.addEventListener('input', () => {
+                quantityInput.addEventListener('change', () => {
                     let newQuantity = parseInt(quantityInput.value);
 
-                    // Валидация ввода
                     if (isNaN(newQuantity) || newQuantity < 1) {
                         newQuantity = 1;
                         quantityInput.value = newQuantity;
                     }
 
-                    // Обновляем количество в корзине
                     item.quantity = newQuantity;
                     localStorage.setItem('cart', JSON.stringify(cart));
-                    displayCartItems(); // Перерисовываем корзину
+                    displayCartItems();
                 });
 
-                // Обработчик для кнопки удаления
                 cartItem.querySelector('.remove-item').addEventListener('click', () => {
                     cart.splice(index, 1);
                     localStorage.setItem('cart', JSON.stringify(cart));
-                    displayCartItems(); // Обновляем отображение
+                    displayCartItems();
                 });
 
                 cartItemsContainer.appendChild(cartItem);
             });
         }
 
-        // Отображаем товары при загрузке страницы
         displayCartItems();
     </script>
 </body>

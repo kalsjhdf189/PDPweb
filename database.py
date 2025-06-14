@@ -205,14 +205,17 @@ class ProductOnWarehouse(Base):
     продукция = relationship("Product", back_populates="продукция_на_складе")
     склад = relationship("Warehouse", back_populates="продукция_на_складе")
 
-
 class PartnerType(Base):
     __tablename__ = 'тип_партнера'
 
     id = Column(Integer, primary_key=True)
     Наименование = Column(String)
 
-    партнеры = relationship("Partner", back_populates="тип")
+class ScopeApplication(Base):
+    __tablename__ = 'сфера_применения'
+
+    id = Column(Integer, primary_key=True)
+    Наименование = Column(String)
 
 class Partner(Base):
     __tablename__ = 'партнер'
@@ -220,16 +223,18 @@ class Partner(Base):
     id = Column(Integer, primary_key=True)
     id_юр_адрес = Column(Integer, ForeignKey('юридический_адрес.id'))
     Наименование = Column(String)
-    ИНН = Column(String)  # Изменено на String
+    ИНН = Column(String)  
     ФИО_директора = Column(String)
-    id_тип = Column(Integer, ForeignKey('тип_партнера.id'))
-    Телефон = Column(String)  # Изменено на String
+    id_тип_партнера = Column(Integer, ForeignKey('тип_партнера.id'))
+    id_сфера_применения = Column(Integer, ForeignKey('сфера_применения.id'))
+    Телефон = Column(String)  
     email = Column(String)
     Места_продаж = Column(String)
     Пароль = Column(String)
     
     юридический_адрес = relationship("LegalAddress", back_populates="партнеры")
-    тип = relationship("PartnerType", back_populates="партнеры")
+    сфера_применения = relationship("ScopeApplication")
+    тип_партнера = relationship("PartnerType")
     заказы = relationship("Order", back_populates="партнер")
 
 class Delivery_method(Base):

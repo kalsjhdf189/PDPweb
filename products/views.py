@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from database import Connect, ProductGroup, ProductType, GroupProductType, Product, Partner, LegalAddress, PartnerType, Order, OrderProduct, Delivery, Payment, Delivery_method
+from database import Connect, ProductGroup, ProductType, GroupProductType, Product, Partner, LegalAddress, PartnerType, Order, OrderProduct, Delivery, Payment, Delivery_method, ScopeApplication
 from django.http import JsonResponse
 import json
 from datetime import datetime
@@ -258,17 +258,38 @@ def register(request):
         улица = request.POST.get('улица')
         дом = request.POST.get('дом')
         тип_партнера_id = request.POST.get('тип_партнера')
+        сфера_применения_id = request.POST.get('сфера_применения')
 
         session = Connect.create_connection()
         try:
+            # Проверка существующего email
             existing_partner_email = session.query(Partner).filter_by(email=email).first()
             if existing_partner_email:
                 messages.error(request, 'Партнёр с таким email уже существует!')
                 return redirect('register')
 
+            # Проверка ИНН
             existing_partner_inn = session.query(Partner).filter_by(ИНН=инн).first()
             if existing_partner_inn:
                 messages.error(request, 'Партнёр с таким ИНН уже существует!')
+                return redirect('register')
+
+            # Проверка, что ИНН состоит только из цифр
+            if not инн.isdigit():
+                messages.error(request, 'ИНН должен содержать только цифры!')
+                return redirect('register')
+
+            # Проверка длины ИНН в зависимости от типа партнера
+            partner_type = session.query(PartnerType).filter_by(id=тип_партнера_id).first()
+            if partner_type:
+                if partner_type.Наименование == 'Юридическое лицо' and len(инн) != 10:
+                    messages.error(request, 'ИНН юридического лица должен содержать 10 цифр!')
+                    return redirect('register')
+                elif partner_type.Наименование == 'Индивидуальный предприниматель' and len(инн) != 12:
+                    messages.error(request, 'ИНН индивидуального предпринимателя должен содержать 12 цифр!')
+                    return redirect('register')
+            else:
+                messages.error(request, 'Выбран неверный тип партнёра!')
                 return redirect('register')
 
             if not all([индекс, регион, город, улица, дом]):
@@ -290,7 +311,8 @@ def register(request):
                 Наименование=наименование,
                 ИНН=инн,
                 ФИО_директора=фио_директора,
-                id_тип=int(тип_партнера_id),
+                id_тип_партнера=int(тип_партнера_id),
+                id_сфера_применения=int(сфера_применения_id) if сфера_применения_id else None,
                 Телефон=телефон,
                 email=email,
                 Места_продаж=места_продаж,
@@ -321,9 +343,11 @@ def register(request):
     session = Connect.create_connection()
     try:
         partner_types = session.query(PartnerType).all()
+        scope_applications = session.query(ScopeApplication).all()
         next_url = request.GET.get('next', '')
         return render(request, 'products/auth.html', {
             'partner_types': partner_types,
+            'scope_applications': scope_applications,
             'show_register_form': True,
             'next': next_url
         })
@@ -355,7 +379,7 @@ def personal_account(request):
             if order.доставка:
                 order.доставка.способ_доставки = session.query(Delivery_method).get(order.доставка.id_способ_доставки)
                 order.доставка.юридический_адрес = session.query(LegalAddress).get(order.доставка.id_юр_адрес)
-            # Вычисление subtotal для каждого заказа
+            
             order.subtotal = sum(item.Стоимость * item.Количество for item in order.заказы_продукции)
 
         return render(request, 'products/personal_account.html', {
